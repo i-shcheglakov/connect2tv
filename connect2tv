@@ -1,9 +1,44 @@
 #!/bin/bash
 
-sdb connect 106.125.40.215 &> /dev/null
+OPTION_CONNECT_ONLY=
+OPTION_IP_ADDR="106.125.40.215"
+
+function usage()
+{
+  echo "Usage: $0 [-c|--connect-only] [-i|-ip-addr IPADDR]"
+}
+
+# Parse command line arguments
+function parse_cmd()
+{
+  for ARG in "$@"; do
+    case $ARG in
+      -c|--connect-only)
+        OPTION_CONNECT_ONLY="True"
+        ;;
+      -i|--ip-addr=*)
+        OPTION_IP_ADDR=${ARG#*=}
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Unknown argument: $ARG" >&2
+        usage
+        return 1
+        ;;
+    esac
+  done
+}
+
+parse_cmd $@
+
+sdb connect "$OPTION_IP_ADDR" &> /dev/null
 sdb root on
 
-sdb push $HOME/GBS-ROOT/local/repos/kantm2.lfd.5.0/armv7l/RPMS/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm /tmp
-sdb shell rpm -e com.samsung.tv.vnc
-sdb shell rpm -ivh --force --nodeps /tmp/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm
-
+if [ -z "$OPTION_CONNECT_ONLY" ]; then
+  sdb push $HOME/GBS-ROOT/local/repos/kantm2.lfd.5.0/armv7l/RPMS/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm /tmp
+  sdb shell rpm -e com.samsung.tv.vnc
+  sdb shell rpm -ivh --force --nodeps /tmp/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm
+fi
