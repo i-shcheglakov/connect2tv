@@ -1,0 +1,9 @@
+#!/bin/bash
+
+sdb connect 106.125.40.215 &> /dev/null
+sdb root on
+
+sdb push $HOME/GBS-ROOT/local/repos/kantm2.lfd.5.0/armv7l/RPMS/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm /tmp
+sdb shell rpm -e com.samsung.tv.vnc
+sdb shell rpm -ivh --force --nodeps /tmp/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm
+
