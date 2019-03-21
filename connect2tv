@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OPTION_CONNECT_ONLY=
-OPTION_IP_ADDR="106.125.40.215"
+OPTION_IP_ADDR=
 
 function usage()
 {
@@ -12,7 +12,7 @@ function usage()
 function parse_cmd()
 {
   for ARG in "$@"; do
-    case $ARG in
+    case "$ARG" in
       -c|--connect-only)
         OPTION_CONNECT_ONLY="True"
         ;;
@@ -34,11 +34,34 @@ function parse_cmd()
 
 parse_cmd $@
 
-sdb connect "$OPTION_IP_ADDR" &> /dev/null
-sdb root on
+# Figure out current default profile in ~/.gbs.conf
+BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' ~/.gbs.conf`
+
+# Discover IP address based on the default profile
+if [ -z "$OPTION_IP_ADDR" ]; then
+
+  case "$BUILD_PROFILE" in
+    muse.m.iwb.main.5.0)
+      OPTION_IP_ADDR="106.125.38.173"
+      ;;
+    kantm2.lfd.5.0)
+      OPTION_IP_ADDR="106.125.40.215"
+      ;;
+    *)
+      echo "Profile-based IP discovery failed. Set -i option." >&2
+      exit 1
+  esac
+
+fi
+
+sdb connect "$OPTION_IP_ADDR"
+sdb -s "$OPTION_IP_ADDR" root on
 
 if [ -z "$OPTION_CONNECT_ONLY" ]; then
-  sdb push $HOME/GBS-ROOT/local/repos/kantm2.lfd.5.0/armv7l/RPMS/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm /tmp
-  sdb shell rpm -e com.samsung.tv.vnc
-  sdb shell rpm -ivh --force --nodeps /tmp/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm
+
+  sdb -s "$OPTION_IP_ADDR" push $HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm /tmp
+  sdb -s "$OPTION_IP_ADDR" shell rpm -e com.samsung.tv.vnc
+  sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps /tmp/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm
+
 fi
+
