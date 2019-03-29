@@ -36,7 +36,7 @@ function parse_cmd()
       *)
         echo "Unknown argument: $ARG" >&2
         usage
-        return 1
+        exit 1
         ;;
     esac
   done
