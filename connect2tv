@@ -2,6 +2,8 @@
 
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
+RPMFILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
+PACKAGE_NAME="com.samsung.tv.vnc"
 
 function usage()
 {
@@ -18,6 +20,14 @@ function parse_cmd()
         ;;
       -i|--ip-addr=*)
         OPTION_IP_ADDR=${ARG#*=}
+        ;;
+      vnc)
+        RPMFILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
+        PACKAGE_NAME="com.samsung.tv.vnc"
+        ;;
+      rdp)
+        RPMFILE="org.tizen.efreerdp-2.0.0-1.armv7l.rpm"
+        PACKAGE_NAME="org.tizen.efreerdp"
         ;;
       -h|--help)
         usage
@@ -59,9 +69,8 @@ sdb -s "$OPTION_IP_ADDR" root on
 
 if [ -z "$OPTION_CONNECT_ONLY" ]; then
 
-  sdb -s "$OPTION_IP_ADDR" push $HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm /tmp
-  sdb -s "$OPTION_IP_ADDR" shell rpm -e com.samsung.tv.vnc
-  sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps /tmp/com.samsung.tv.vnc-1.0.0-1.armv7l.rpm
+  sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS/$RPMFILE" /tmp
+  sdb -s "$OPTION_IP_ADDR" shell rpm -e "$PACKAGE_NAME"
+  sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPMFILE"
 
 fi
-
