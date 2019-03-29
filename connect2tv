@@ -1,4 +1,5 @@
 #!/bin/bash
+# Author: Igor Shcheglakov (i.shcheglako@samsung.com)
 
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
@@ -67,10 +68,12 @@ fi
 sdb connect "$OPTION_IP_ADDR"
 sdb -s "$OPTION_IP_ADDR" root on
 
-if [ -z "$OPTION_CONNECT_ONLY" ]; then
-
-  sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS/$RPMFILE" /tmp
-  sdb -s "$OPTION_IP_ADDR" shell rpm -e "$PACKAGE_NAME"
-  sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPMFILE"
-
+if [ "x$OPTION_CONNECT_ONLY" != "x" ]; then
+  exit 0
 fi
+
+# Push RPM package onto the device
+sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS/$RPMFILE" /tmp
+# Reinstall the package
+sdb -s "$OPTION_IP_ADDR" shell rpm -e "$PACKAGE_NAME"
+sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPMFILE"
