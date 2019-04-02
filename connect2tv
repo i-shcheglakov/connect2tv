@@ -57,7 +57,7 @@ BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' $HOME/.gbs.conf`
 if [ -z "$OPTION_IP_ADDR" ]; then
 
   case "$BUILD_PROFILE" in
-    muse.m.iwb.main.5.0)
+    muse.m.iwb.5.0)
       OPTION_IP_ADDR="106.125.38.173" # FLiP
       ;;
     kantm2.lfd.5.0)
