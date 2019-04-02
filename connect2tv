@@ -45,8 +45,13 @@ function parse_cmd()
 
 parse_cmd $@
 
+if [ ! -e "$HOME/.gbs.conf" ]; then
+  echo "$HOME/.gbs.conf not found." >&2
+  exit 1
+fi
+
 # Figure out current default profile in ~/.gbs.conf
-BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' ~/.gbs.conf`
+BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' $HOME/.gbs.conf`
 
 # Discover IP address based on the default profile
 if [ -z "$OPTION_IP_ADDR" ]; then
