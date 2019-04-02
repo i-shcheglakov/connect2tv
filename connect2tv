@@ -8,7 +8,7 @@ PACKAGE_NAME="com.samsung.tv.vnc"
 
 function usage()
 {
-  echo "Usage: `basename $0` [-c|--connect-only] [-i|-ip-addr <addr>] [vnc|rdp]"
+  echo "Usage: `basename $0` [-c|--connect-only] [-i|-ip-addr=<addr>] [vnc|rdp]"
 }
 
 # Parse command line arguments
@@ -59,7 +59,7 @@ if [ -z "$OPTION_IP_ADDR" ]; then
       OPTION_IP_ADDR="106.125.40.215"
       ;;
     *)
-      echo "Profile-based IP discovery failed. Set -i option." >&2
+      echo "IP discovery for $BUILD_PROFILE failed. Run with -i option." >&2
       exit 1
   esac
 
