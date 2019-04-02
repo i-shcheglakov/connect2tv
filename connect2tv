@@ -8,7 +8,7 @@ PACKAGE_NAME="com.samsung.tv.vnc"
 
 function usage()
 {
-  echo "Usage: $0 [-c|--connect-only] [-i|-ip-addr <addr>] [vnc|rdp]"
+  echo "Usage: `basename $0` [-c|--connect-only] [-i|-ip-addr <addr>] [vnc|rdp]"
 }
 
 # Parse command line arguments

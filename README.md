@@ -2,7 +2,7 @@
 The script simplifies B2B development workflow. It automatically discovers
 currently active GBS profile in `~/.gbs.conf` and IP address of the target device accordingly.
 
-The default workflow is to build using `gbb` and copy artifacts using `connect2tv vnc rdp`. To directly specify IP address of the target device use `--ip-addr` option.
+The default workflow is to build using `gbb` and copy artifacts using `connect2tv vnc` or `rdp`. To directly specify IP address of the target device use `--ip-addr` option.
 
 ## Install
 Clone repository:
@@ -22,9 +22,9 @@ source $HOME/.bashrc
 In order to fetch recent updates use `git pull`.
 
 ## Usage examples
-Copy VNC and RDP packages to the target device:
+Copy VNC or RDP packages to the target device:
 ```
-connect2tv vnc rdp
+connect2tv vnc
 ```
 Connect only, no copying:
 ```
