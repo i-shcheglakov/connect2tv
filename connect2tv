@@ -3,12 +3,13 @@
 
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
+BUILD_PROFILE=
 RPMFILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
 PACKAGE_NAME="com.samsung.tv.vnc"
 
 function usage()
 {
-  echo "Usage: `basename $0` [-c|--connect-only] [-i|-ip-addr=<addr>] [vnc|rdp]"
+  echo "Usage: `basename $0` [-c|--connect-only] [-i|-ip-addr=<addr>] [-p|--profile=<profile>] [vnc|rdp]"
 }
 
 # Parse command line arguments
@@ -19,8 +20,11 @@ function parse_cmd()
       -c|--connect-only)
         OPTION_CONNECT_ONLY="True"
         ;;
-      -i|--ip-addr=*)
+      -i=*|--ip-addr=*)
         OPTION_IP_ADDR=${ARG#*=}
+        ;;
+      -p=*|--profile=*)
+        BUILD_PROFILE=${ARG#*=}
         ;;
       vnc)
         RPMFILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
@@ -46,12 +50,16 @@ function parse_cmd()
 parse_cmd $@
 
 if [ ! -e "$HOME/.gbs.conf" ]; then
-  echo "$HOME/.gbs.conf not found." >&2
+  echo "$HOME/.gbs.conf not found" >&2
   exit 1
 fi
 
-# Figure out current default profile in ~/.gbs.conf
-BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' $HOME/.gbs.conf`
+# Figure out current default profile in $HOME/.gbs.conf if not set with CLI
+if [ -z "$BUILD_PROFILE" ]; then
+  BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf"`
+else
+  BUILD_PROFILE=`echo "$BUILD_PROFILE" | sed -n 's/profile.\(.*\)$/\1/p'`
+fi
 
 # Discover IP address based on the default profile
 if [ -z "$OPTION_IP_ADDR" ]; then
@@ -64,7 +72,8 @@ if [ -z "$OPTION_IP_ADDR" ]; then
       OPTION_IP_ADDR="106.125.40.215"
       ;;
     *)
-      echo "IP discovery for $BUILD_PROFILE failed. Run with -i option." >&2
+      echo "Can't match profile '$BUILD_PROFILE' with any known IP addresses." >&2
+      echo "Use --ip-addr=<addr> option to set IP address of a target device." >&2
       exit 1
   esac
 
