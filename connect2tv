@@ -3,36 +3,38 @@
 
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
-BUILD_PROFILE=
-RPMFILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
-PACKAGE_NAME="com.samsung.tv.vnc"
+OPTION_BUILD_PROFILE=
+OPTION_RPM_FILE=
+OPTION_PACKAGE_NAME=
 
 function usage()
 {
-  echo "Usage: `basename $0` [-c|--connect-only] [-i|-ip-addr=<addr>] [-p|--profile=<profile>] [vnc|rdp]"
+  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [vnc|rdp]"
 }
 
 # Parse command line arguments
 function parse_cmd()
 {
+  if [ $# -eq 0 ]; then
+    OPTION_CONNECT_ONLY="True"
+    return
+  fi
+
   for ARG in "$@"; do
     case "$ARG" in
-      -c|--connect-only)
-        OPTION_CONNECT_ONLY="True"
-        ;;
-      -i=*|--ip-addr=*)
+      -i=)
         OPTION_IP_ADDR=${ARG#*=}
         ;;
-      -p=*|--profile=*)
-        BUILD_PROFILE=${ARG#*=}
+      -p=*)
+        OPTION_BUILD_PROFILE=${ARG#*=}
         ;;
       vnc)
-        RPMFILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
-        PACKAGE_NAME="com.samsung.tv.vnc"
+        OPTION_RPM_FILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
+        OPTION_PACKAGE_NAME="com.samsung.tv.vnc"
         ;;
       rdp)
-        RPMFILE="org.tizen.efreerdp-2.0.0-1.armv7l.rpm"
-        PACKAGE_NAME="org.tizen.efreerdp"
+        OPTION_RPM_FILE="org.tizen.efreerdp-2.0.0-1.armv7l.rpm"
+        OPTION_PACKAGE_NAME="org.tizen.efreerdp"
         ;;
       -h|--help)
         usage
@@ -55,16 +57,16 @@ if [ ! -e "$HOME/.gbs.conf" ]; then
 fi
 
 # Figure out current default profile in $HOME/.gbs.conf if not set with CLI
-if [ -z "$BUILD_PROFILE" ]; then
-  BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf"`
+if [ -z "$OPTION_BUILD_PROFILE" ]; then
+  OPTION_BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf"`
 else
-  BUILD_PROFILE=`echo "$BUILD_PROFILE" | sed -n 's/profile.\(.*\)$/\1/p'`
+  OPTION_BUILD_PROFILE=`echo "$OPTION_BUILD_PROFILE" | sed -n 's/profile.\(.*\)$/\1/p'`
 fi
 
 # Discover IP address based on the default profile
 if [ -z "$OPTION_IP_ADDR" ]; then
 
-  case "$BUILD_PROFILE" in
+  case "$OPTION_BUILD_PROFILE" in
     muse.m.iwb.5.0)
       OPTION_IP_ADDR="106.125.38.173" # FLiP
       ;;
@@ -72,8 +74,8 @@ if [ -z "$OPTION_IP_ADDR" ]; then
       OPTION_IP_ADDR="106.125.40.215"
       ;;
     *)
-      echo "Can't match profile '$BUILD_PROFILE' with any known IP addresses." >&2
-      echo "Use --ip-addr=<addr> option to set IP address of a target device." >&2
+      echo "Can't match profile '$OPTION_BUILD_PROFILE' with any known IP address." >&2
+      echo "Use -i=<addr> option to explicitly set IP address of a target device ." >&2
       exit 1
   esac
 
@@ -86,8 +88,12 @@ if [ "x$OPTION_CONNECT_ONLY" != "x" ]; then
   exit 0
 fi
 
+if [ -z "$OPTION_RPM_FILE" ]; then
+  exit 0
+fi
+
 # Push RPM package onto the device
-sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS/$RPMFILE" /tmp
+sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS/$OPTION_RPM_FILE" /tmp
 # Reinstall the package
-sdb -s "$OPTION_IP_ADDR" shell rpm -e "$PACKAGE_NAME"
-sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPMFILE"
+sdb -s "$OPTION_IP_ADDR" shell rpm -e "$OPTION_PACKAGE_NAME"
+sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$OPTION_RPM_FILE"
