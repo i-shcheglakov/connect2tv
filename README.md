@@ -11,15 +11,16 @@ connect2tv [-i=<addr>] [-p=<profile>] [vnc|rdp]
 ```
 
 ## Install
-Clone repository to `/path/to/the/repo` and create symbolic link in `~/.local/bin` to the script:
+Clone repository to `/path/to/the/repo`.
 ```
-mkdir -p ~/.local/bin
-ln -s /path/to/the/repo/connect2tv ~/.local/bin/connect2tv
+cd /path/to/the/repo
+sudo make install
 ```
-Make sure `~/.local/bin` is in `$PATH`:
+Default installation path is `/usr/local/bin`.
+
+To uninstall:
 ```
-echo '$PATH=$HOME/.local/bin:$PATH' >> $HOME/.bashrc
-source $HOME/.bashrc
+sudo make uninstall
 ```
 In order to fetch the most recent updates use `git pull`.
 
