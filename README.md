@@ -1,13 +1,13 @@
 # connect2tv
 The script simplifies B2B development workflow. It automatically discovers
-IP address of the target device based upon currently active GBS profile in `~/.gbs.conf` and re-installs `vnc` or `rdp` packages.
+IP address of the target device based upon currently active GBS profile in `~/.gbs.conf` and re-installs `vnc`, `rdp` or `knox` packages.
 
-Default workflow is to build using `gbb` and copy artifacts using `connect2tv vnc` or `rdp`.
+Default workflow is to build using `gbb` and copy artifacts using `connect2tv vnc`, `rdp` or `knox`.
 To explicitly specify IP address of the target device use `-i=<addr>` option.
 
 Usage:
 ```
-connect2tv [-i=<addr>] [-p=<profile>] [vnc|rdp]
+connect2tv [-i=<addr>] [-p=<profile>] [vnc|rdp|knox]
 ```
 
 ## Install
