@@ -9,7 +9,7 @@ OPTION_PACKAGE_NAME=
 
 function usage()
 {
-  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [vnc|rdp|knox]"
+  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] vnc|rdp|knox"
 }
 
 # Parse command line arguments
@@ -37,7 +37,7 @@ function parse_cmd()
         OPTION_PACKAGE_NAME="org.tizen.efreerdp"
         ;;
       knox)
-        OPTION_RPM_FILE="org.tizen.knox-browser-2.2.0.0322190-1.armv7l.rpm"
+        OPTION_RPM_FILE="org.tizen.knox-browser-2.4.0-1.armv7l.rpm"
         OPTION_PACKAGE_NAME="org.tizen.knox-browser"
         ;;
       -h|--help)
@@ -78,6 +78,7 @@ if [ -z "$OPTION_IP_ADDR" ]; then
       OPTION_IP_ADDR="106.125.40.215"
       ;;
     muse.m.atsc.5.0)
+      #OPTION_IP_ADDR="106.125.38.127"
       OPTION_IP_ADDR="106.125.38.231"
       ;;
     *)
@@ -103,6 +104,7 @@ fi
 sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS/$OPTION_RPM_FILE" /tmp
 # Reinstall the package
 sdb -s "$OPTION_IP_ADDR" shell rpm -e "$OPTION_PACKAGE_NAME"
+sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$OPTION_PACKAGE_NAME"
 sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$OPTION_RPM_FILE"
 
 if [ "x$OPTION_PACKAGE_NAME" != "x" ]; then
