@@ -7,7 +7,7 @@ To explicitly specify IP address of the target device use `-i=<addr>` option.
 
 Usage:
 ```
-connect2tv [-i=<addr>] [-p=<profile>] vnc|rdp|knox
+connect2tv [-i=<addr>] [-p=<profile>] [vnc|rdp|knox]
 ```
 
 ## Install
