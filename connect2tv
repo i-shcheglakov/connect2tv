@@ -4,8 +4,8 @@
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
 OPTION_BUILD_PROFILE=
-OPTION_RPM_FILE=
-OPTION_PACKAGE_NAME=
+
+declare -a OPTION_RPMS
 
 function usage()
 {
@@ -29,16 +29,16 @@ function parse_cmd()
         OPTION_BUILD_PROFILE=${ARG#*=}
         ;;
       vnc)
-        OPTION_RPM_FILE="com.samsung.tv.vnc-1.0.0-1.armv7l.rpm"
-        OPTION_PACKAGE_NAME="com.samsung.tv.vnc"
+        OPTION_RPMS=("com.samsung.tv.vnc-1.0.0-1.armv7l.rpm")
         ;;
       rdp)
-        OPTION_RPM_FILE="org.tizen.efreerdp-2.0.0-1.armv7l.rpm"
-        OPTION_PACKAGE_NAME="org.tizen.efreerdp"
+        OPTION_RPMS=("org.tizen.efreerdp-2.0.0-1.armv7l.rpm")
         ;;
       knox)
-        OPTION_RPM_FILE="org.tizen.knox-browser-2.5.3-1.armv7l.rpm"
-        OPTION_PACKAGE_NAME="org.tizen.knox-browser"
+        OPTION_RPMS=("com.samsung.tv.knox-browser-2.9.0-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-2.9.0-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-2.9.0-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-2.9.0-1.armv7l.rpm")
         ;;
       -h|--help)
         usage
@@ -77,7 +77,7 @@ if [ -z "$OPTION_IP_ADDR" ]; then
     kant.m2.lfd.5.0)
       OPTION_IP_ADDR="106.125.40.215"
       ;;
-    muse.m.atsc.5.0)
+    muse.l.atsc.5.5)
       #OPTION_IP_ADDR="106.125.38.127"
       OPTION_IP_ADDR="106.125.38.231"
       ;;
@@ -96,17 +96,20 @@ if [ "x$OPTION_CONNECT_ONLY" != "x" ]; then
   exit 0
 fi
 
-if [ -z "$OPTION_RPM_FILE" ]; then
-  exit 0
-fi
+# Push and install RPM package(s) onto the device
+for RPM_FILE in ${OPTION_RPMS[@]}; do
 
-# Push RPM package onto the device
-sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS/$OPTION_RPM_FILE" /tmp
-# Reinstall the package
-sdb -s "$OPTION_IP_ADDR" shell rpm -e "$OPTION_PACKAGE_NAME"
-sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$OPTION_PACKAGE_NAME"
-sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$OPTION_RPM_FILE"
+  # Get package name from RPM file name
+  PKG_NAME=${RPM_FILE%-*-*}
 
-if [ "x$OPTION_PACKAGE_NAME" != "x" ]; then
-  sdb -s "$OPTION_IP_ADDR" shell tpk-backend -y "$OPTION_PACKAGE_NAME" --preload
-fi
+  sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS/$RPM_FILE" /tmp
+
+  sdb -s "$OPTION_IP_ADDR" shell rpm -e --nodeps "$PKG_NAME"
+  sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$PKG_NAME"
+  sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPM_FILE"
+
+  if [ "x$PKG_NAME" != "x" ]; then
+    sdb -s "$OPTION_IP_ADDR" shell tpk-backend -y "$PKG_NAME" --preload
+  fi
+
+done
