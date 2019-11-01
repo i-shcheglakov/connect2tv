@@ -62,7 +62,7 @@ fi
 
 # Figure out current default profile in $HOME/.gbs.conf if not set with CLI
 if [ -z "$OPTION_BUILD_PROFILE" ]; then
-  OPTION_BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf"`
+  OPTION_BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf" | tr -d " "`
 else
   OPTION_BUILD_PROFILE=`echo "$OPTION_BUILD_PROFILE" | sed -n 's/profile.\(.*\)$/\1/p'`
 fi
