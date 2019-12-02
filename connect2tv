@@ -1,5 +1,6 @@
 #!/bin/bash
 # Author: Igor Shcheglakov (i.shcheglako@samsung.com)
+# TODO: regex for version number
 
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
@@ -35,10 +36,10 @@ function parse_cmd()
         OPTION_RPMS=("org.tizen.efreerdp-2.0.0-1.armv7l.rpm")
         ;;
       knox)
-        OPTION_RPMS=("com.samsung.tv.knox-browser-2.9.0-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-2.9.0-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-2.9.0-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-2.9.0-1.armv7l.rpm")
+        OPTION_RPMS=("com.samsung.tv.knox-browser-2.10.4-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-2.10.4-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-2.10.4-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-2.10.4-1.armv7l.rpm")
         ;;
       -h|--help)
         usage
@@ -71,15 +72,8 @@ fi
 if [ -z "$OPTION_IP_ADDR" ]; then
 
   case "$OPTION_BUILD_PROFILE" in
-    muse.m.iwb.5.0)
-      OPTION_IP_ADDR="106.125.38.173" # FLiP
-      ;;
-    kant.m2.lfd.5.0)
+    muse.m.atsc.5.5)
       OPTION_IP_ADDR="106.125.40.215"
-      ;;
-    muse.l.atsc.5.5)
-      #OPTION_IP_ADDR="106.125.38.127"
-      OPTION_IP_ADDR="106.125.38.231"
       ;;
     *)
       echo "Can't match profile '$OPTION_BUILD_PROFILE' with any known IP address." >&2
