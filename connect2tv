@@ -6,6 +6,8 @@ OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
 OPTION_BUILD_PROFILE=
 
+KNOX_BROWSER_VERSION=2.14.2
+
 declare -a OPTION_RPMS
 
 function usage()
@@ -36,10 +38,10 @@ function parse_cmd()
         OPTION_RPMS=("org.tizen.efreerdp-2.0.0-1.armv7l.rpm")
         ;;
       knox)
-        OPTION_RPMS=("com.samsung.tv.knox-browser-2.10.4-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-2.10.4-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-2.10.4-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-2.10.4-1.armv7l.rpm")
+        OPTION_RPMS=("com.samsung.tv.knox-browser-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
         ;;
       -h|--help)
         usage
