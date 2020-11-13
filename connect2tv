@@ -5,14 +5,15 @@
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
 OPTION_BUILD_PROFILE=
+OPTION_PKG_DIR=
 
-KNOX_BROWSER_VERSION=2.14.2
+KNOX_BROWSER_VERSION=2.22.7 #3.10.1
 
 declare -a OPTION_RPMS
 
 function usage()
 {
-  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [vnc|rdp|knox]"
+  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [-d=<dir>] [vnc|rdp|knox]"
 }
 
 # Parse command line arguments
@@ -31,6 +32,9 @@ function parse_cmd()
       -p=*)
         OPTION_BUILD_PROFILE=${ARG#*=}
         ;;
+      -d=*)
+        OPTION_PKG_DIR=${ARG#*=}
+	;;
       vnc)
         OPTION_RPMS=("com.samsung.tv.vnc-1.0.0-1.armv7l.rpm")
         ;;
@@ -92,13 +96,17 @@ if [ "x$OPTION_CONNECT_ONLY" != "x" ]; then
   exit 0
 fi
 
+if [ "x$OPTION_PKG_DIR" == "x" ]; then
+  OPTION_PKG_DIR="$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS"
+fi
+
 # Push and install RPM package(s) onto the device
 for RPM_FILE in ${OPTION_RPMS[@]}; do
 
   # Get package name from RPM file name
   PKG_NAME=${RPM_FILE%-*-*}
 
-  sdb -s "$OPTION_IP_ADDR" push "$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS/$RPM_FILE" /tmp
+  sdb -s "$OPTION_IP_ADDR" push "$OPTION_PKG_DIR/$RPM_FILE" /tmp
 
   sdb -s "$OPTION_IP_ADDR" shell rpm -e --nodeps "$PKG_NAME"
   sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$PKG_NAME"
