@@ -7,7 +7,7 @@ OPTION_IP_ADDR=
 OPTION_BUILD_PROFILE=
 OPTION_PKG_DIR=
 
-KNOX_BROWSER_VERSION=2.22.7 #3.10.1
+KNOX_BROWSER_VERSION=3.10.1
 
 declare -a OPTION_RPMS
 
@@ -35,6 +35,9 @@ function parse_cmd()
       -d=*)
         OPTION_PKG_DIR=${ARG#*=}
 	;;
+      -v=*)
+        KNOX_BROWSER_VERSION=${ARG#*=}
+        ;;
       vnc)
         OPTION_RPMS=("com.samsung.tv.vnc-1.0.0-1.armv7l.rpm")
         ;;
