@@ -1,19 +1,17 @@
 #!/bin/bash
 # Author: Igor Shcheglakov (i.shcheglako@samsung.com)
-# TODO: regex for version number
 
 OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
 OPTION_BUILD_PROFILE=
 OPTION_PKG_DIR=
-
-KNOX_BROWSER_VERSION=3.10.1
+OPTION_PKG_VERSION=
 
 declare -a OPTION_RPMS
 
 function usage()
 {
-  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [-d=<dir>] [vnc|rdp|knox]"
+  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [-v=<version>] [-d=<dir>] [vnc|rdp|knox]"
 }
 
 # Parse command line arguments
@@ -36,19 +34,19 @@ function parse_cmd()
         OPTION_PKG_DIR=${ARG#*=}
 	;;
       -v=*)
-        KNOX_BROWSER_VERSION=${ARG#*=}
+        OPTION_PKG_VERSION=${ARG#*=}
         ;;
       vnc)
-        OPTION_RPMS=("com.samsung.tv.vnc-1.0.0-1.armv7l.rpm")
+        OPTION_RPMS=("com.samsung.tv.vnc-{}-1.armv7l.rpm")
         ;;
       rdp)
-        OPTION_RPMS=("org.tizen.efreerdp-2.0.0-1.armv7l.rpm")
+        OPTION_RPMS=("org.tizen.efreerdp-{}-1.armv7l.rpm")
         ;;
       knox)
-        OPTION_RPMS=("com.samsung.tv.knox-browser-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
-        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-$KNOX_BROWSER_VERSION-1.armv7l.rpm")
+        OPTION_RPMS=("com.samsung.tv.knox-browser-{}-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-autofill-{}-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-libs-{}-1.armv7l.rpm")
+        OPTION_RPMS+=("com.samsung.tv.knox-browser-theme-resource-{}-1.armv7l.rpm")
         ;;
       -h|--help)
         usage
@@ -95,16 +93,21 @@ fi
 sdb connect "$OPTION_IP_ADDR"
 sdb -s "$OPTION_IP_ADDR" root on
 
-if [ "x$OPTION_CONNECT_ONLY" != "x" ]; then
+if [ ! -z "$OPTION_CONNECT_ONLY" ]; then
   exit 0
 fi
 
-if [ "x$OPTION_PKG_DIR" == "x" ]; then
+if [ -z "$OPTION_PKG_VERSION" ]; then
+  echo "Package version hasn't been specified. Use -v=<version>" >&2
+  exit 1
+fi
+
+if [ -z "$OPTION_PKG_DIR" ]; then
   OPTION_PKG_DIR="$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS"
 fi
 
 # Push and install RPM package(s) onto the device
-for RPM_FILE in ${OPTION_RPMS[@]}; do
+for RPM_FILE in ${OPTION_RPMS[@]/'{}'/$OPTION_PKG_VERSION}; do
 
   # Get package name from RPM file name
   PKG_NAME=${RPM_FILE%-*-*}
