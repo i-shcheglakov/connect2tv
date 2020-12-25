@@ -1,33 +1,30 @@
 # connect2tv
-The tool simplifies RPM package deployment for Tizen devices. It automatically discovers
-IP address of the target device based upon currently active GBS profile in `~/.gbs.conf` and re-installs `vnc`, `rdp` or `knox` packages.
+The tool simplifies RPM package deployment for Tizen devices.
 
-Default workflow is to build using `gbs` and install artifacts on a target device with `connect2tv vnc`, `rdp` or `knox`.
-To explicitly specify IP address of the target device use `-i=<addr>` option.
+The workflow is to build with `gbs` and install RPMs on a target device with `connect2tv vnc`, `rdp` or `knox`.
+To specify IP address of the target device use `-i=<addr>` option.
+To explicitly specify package directory use `-d=<directory>` option.
+If no directory specified it defaults to RPMs directory of currently active `gbs` profile.
 
 Usage:
 ```
-connect2tv [-i=<addr>] [-p=<profile>] [-d=<directory] [-v=<version>] [vnc|rdp|knox]
+connect2tv [-i=<addr>] [-d=<directory] [-v=<version>] [vnc|rdp|knox]
 ```
 
 ## Install
-Clone repository to `/path/to/the/repo`.
 ```
-cd /path/to/the/repo
 sudo make install
 ```
-Default installation path is `/usr/local/bin`.
+Default installation path is `/usr/local/bin`. The symbolic link is created.
 
 To uninstall:
 ```
 sudo make uninstall
 ```
-In order to fetch the most recent updates use `git pull`.
-
 ## Usage examples
-Copy knox packages to the target device:
+Install `knox` packages to the target device:
 ```
-connect2tv knox
+connect2tv -i=192.168.1.127 knox
 ```
 Connect only:
 ```
