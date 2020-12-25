@@ -1,9 +1,7 @@
 #!/bin/bash
 # Author: Igor Shcheglakov (i.shcheglako@samsung.com)
 
-OPTION_CONNECT_ONLY=
 OPTION_IP_ADDR=
-OPTION_BUILD_PROFILE=
 OPTION_PKG_DIR=
 OPTION_PKG_VERSION=
 
@@ -11,24 +9,15 @@ declare -a OPTION_RPMS
 
 function usage()
 {
-  echo "Usage: `basename $0` [-i=<addr>] [-p=<profile>] [-v=<version>] [-d=<dir>] [vnc|rdp|knox]"
+  echo "Usage: `basename $0` [-i=<addr>] [-v=<version>] [-d=<dir>] [vnc|rdp|knox]"
 }
 
-# Parse command line arguments
 function parse_cmd()
 {
-  if [ $# -eq 0 ]; then
-    OPTION_CONNECT_ONLY="True"
-    return
-  fi
-
   for ARG in "$@"; do
     case "$ARG" in
       -i=*)
         OPTION_IP_ADDR=${ARG#*=}
-        ;;
-      -p=*)
-        OPTION_BUILD_PROFILE=${ARG#*=}
         ;;
       -d=*)
         OPTION_PKG_DIR=${ARG#*=}
@@ -63,47 +52,32 @@ function parse_cmd()
 
 parse_cmd $@
 
-if [ ! -e "$HOME/.gbs.conf" ]; then
-  echo "$HOME/.gbs.conf not found" >&2
-  exit 1
-fi
-
-# Figure out current default profile in $HOME/.gbs.conf if not set with CLI
-if [ -z "$OPTION_BUILD_PROFILE" ]; then
-  OPTION_BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf" | tr -d " "`
-else
-  OPTION_BUILD_PROFILE=`echo "$OPTION_BUILD_PROFILE" | sed -n 's/profile.\(.*\)$/\1/p'`
-fi
-
-# Discover IP address based on the default profile
 if [ -z "$OPTION_IP_ADDR" ]; then
-
-  case "$OPTION_BUILD_PROFILE" in
-    muse.m.atsc.5.5)
-      OPTION_IP_ADDR="106.125.40.215"
-      ;;
-    *)
-      echo "Can't match profile '$OPTION_BUILD_PROFILE' with any known IP address." >&2
-      echo "Use -i=<addr> option to explicitly set IP address of a target device ." >&2
-      exit 1
-  esac
-
+  echo "IP address of the target not specified. Use -i=<addr>" >&2
+  exit 1
 fi
 
 sdb connect "$OPTION_IP_ADDR"
 sdb -s "$OPTION_IP_ADDR" root on
 
-if [ ! -z "$OPTION_CONNECT_ONLY" ]; then
+# Connect only
+if [ -z "$OPTION_RPMS" ]; then
   exit 0
 fi
 
 if [ -z "$OPTION_PKG_VERSION" ]; then
-  echo "Package version hasn't been specified. Use -v=<version>" >&2
+  echo "Package version not specified. Use -v=<version>" >&2
   exit 1
 fi
 
+if [ ! -e "$HOME/.gbs.conf" ]; then
+  echo "File $HOME/.gbs.conf not found" >&2
+  exit 1
+fi
+
+BUILD_PROFILE=`sed -n 's/profile = profile.\(.*\)$/\1/p' "$HOME/.gbs.conf" | tr -d " "`
 if [ -z "$OPTION_PKG_DIR" ]; then
-  OPTION_PKG_DIR="$HOME/GBS-ROOT/local/repos/$OPTION_BUILD_PROFILE/armv7l/RPMS"
+  OPTION_PKG_DIR="$HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS"
 fi
 
 # Push and install RPM package(s) onto the device
@@ -117,9 +91,6 @@ for RPM_FILE in ${OPTION_RPMS[@]/'{}'/$OPTION_PKG_VERSION}; do
   sdb -s "$OPTION_IP_ADDR" shell rpm -e --nodeps "$PKG_NAME"
   sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$PKG_NAME"
   sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPM_FILE"
-
-  if [ "x$PKG_NAME" != "x" ]; then
-    sdb -s "$OPTION_IP_ADDR" shell tpk-backend -y "$PKG_NAME" --preload
-  fi
+  sdb -s "$OPTION_IP_ADDR" shell tpk-backend -y "$PKG_NAME" --preload
 
 done
