@@ -50,6 +50,21 @@ function parse_cmd()
   done
 }
 
+function install_rpms()
+{
+  for RPM_FILE in ${OPTION_RPMS[@]/'{}'/$OPTION_PKG_VERSION}; do
+    # Get package name from RPM file name
+    PKG_NAME=${RPM_FILE%-*-*}
+
+    sdb -s "$OPTION_IP_ADDR" push "$OPTION_PKG_DIR/$RPM_FILE" /tmp
+
+    sdb -s "$OPTION_IP_ADDR" shell rpm -e --nodeps "$PKG_NAME"
+    sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$PKG_NAME"
+    sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPM_FILE"
+    sdb -s "$OPTION_IP_ADDR" shell tpk-backend -y "$PKG_NAME" --preload
+  done
+}
+
 parse_cmd $@
 
 if [ -z "$OPTION_IP_ADDR" ]; then
@@ -80,17 +95,4 @@ if [ -z "$OPTION_PKG_DIR" ]; then
   OPTION_PKG_DIR="$HOME/GBS-ROOT/local/repos/$BUILD_PROFILE/armv7l/RPMS"
 fi
 
-# Push and install RPM package(s) onto the device
-for RPM_FILE in ${OPTION_RPMS[@]/'{}'/$OPTION_PKG_VERSION}; do
-
-  # Get package name from RPM file name
-  PKG_NAME=${RPM_FILE%-*-*}
-
-  sdb -s "$OPTION_IP_ADDR" push "$OPTION_PKG_DIR/$RPM_FILE" /tmp
-
-  sdb -s "$OPTION_IP_ADDR" shell rpm -e --nodeps "$PKG_NAME"
-  sdb -s "$OPTION_IP_ADDR" shell tpk-backend --force-remove --preload -d "$PKG_NAME"
-  sdb -s "$OPTION_IP_ADDR" shell rpm -ivh --force --nodeps "/tmp/$RPM_FILE"
-  sdb -s "$OPTION_IP_ADDR" shell tpk-backend -y "$PKG_NAME" --preload
-
-done
+install_rpms
